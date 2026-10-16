@@ -11,7 +11,7 @@
 
 Aplikasi tidak membutuhkan database maupun backend. Untuk hasil paling konsisten, jalankan melalui server lokal, misalnya ekstensi Live Server pada VS Code.
 
-### Struktur
+## Struktur
 - `index.html`: dashboard/navigasi.
 - `stok.html`: inventaris bahan ajar.
 - `tracking.html`: pembuatan dan tracking DO.
@@ -20,7 +20,7 @@ Aplikasi tidak membutuhkan database maupun backend. Untuk hasil paling konsisten
 - `js/stok-app.js`: logika halaman stok.
 - `js/tracking-app.js`: logika halaman DO.
 
-### Fitur
+## Fitur
 - Filter pencarian, UT-Daerah, kategori, status stok, dan sorting stok.
 - Status stok dihitung dari qty dan safety stock.
 - Tambah, edit, dan hapus data stok; data stok bawaan tidak dapat dihapus dan menampilkan alert; validasi kode duplikat dan nilai negatif.
@@ -29,7 +29,7 @@ Aplikasi tidak membutuhkan database maupun backend. Untuk hasil paling konsisten
 - Nomor DO otomatis, detail paket dan harga otomatis, pencarian/filter DO, perubahan status berurutan, riwayat status, serta hapus DO buatan sendiri. DO bawaan tidak dapat dihapus dan menampilkan alert. Data DO awal mencakup status Terkirim dan Dalam Perjalanan.
 - Minimal dua watcher Vue pada setiap halaman.
 
-### Batasan prototipe tanpa backend
+## Batasan prototipe tanpa backend
 - Data hanya tersimpan di browser/perangkat yang digunakan dan tidak tersinkronisasi antar pengguna.
 - `dataBahanAjar.js` tetap merupakan sumber data awal; perubahan disimpan di `localStorage`.
 - Tidak ada autentikasi, API ekspedisi, atau database terpusat.
