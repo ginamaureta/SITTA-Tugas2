@@ -2,7 +2,7 @@
 
 ## Cara menjalankan
 ### Opsi 1: Online (tanpa mengunduh)
-1. Buka link demo aplikasi https://ginamaureta.github.io/SITTA_Praktik1_SourceCode/
+1. Buka link demo aplikasi https://ginamaureta.github.io/SITTA-Tugas2/
 
 ### Opsi 2: Di komputer sendiri
 1. Klik tombol hijau **Code**, lalu **Download ZIP**.
