@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>SITTA UT | Tracking DO</title><link rel="stylesheet" href="css/style.css"></head>
+<body>
+  <header class="topbar"><a class="brand-mark brand-link" href="index.html">UT</a><div><p class="eyebrow">UNIVERSITAS TERBUKA</p><h1>SITTA <span>Dashboard</span></h1></div><a class="top-pill back-link" href="index.html">← Beranda</a></header>
+  <main id="trackingApp" class="container page-container">
+    <div class="page-title-row"><div><p class="eyebrow">MODUL 02 / DISTRIBUSI</p><h2>Tracking Delivery Order</h2><p class="muted">Buat Delivery Order baru dan pantau informasi pengiriman.</p></div><span class="status-pill status-info">● Data simulasi</span></div>
+    <div class="stats-grid tracking-stats">
+      <div class="stat-card"><span class="stat-label">Total DO</span><strong>{{ daftarDO.length }}</strong><small>Data tersedia</small></div>
+      <div class="stat-card"><span class="stat-label">Dalam perjalanan</span><strong class="blue-text">{{ jumlahPerjalanan }}</strong><small>Status pengiriman</small></div>
+      <div class="stat-card"><span class="stat-label">Total nilai paket</span><strong>{{ formatRupiah(totalNilai) }}</strong><small>Akumulasi data DO</small></div>
+    </div>
+    <section class="panel">
+      <div class="panel-heading"><div><p class="eyebrow">INPUT PENGIRIMAN</p><h3>Buat Delivery Order</h3></div><span class="subtle-tag">Nomor DO otomatis</span></div>
+      <form @submit.prevent="buatDO" class="form-grid">
+        <label>Nomor DO (otomatis)<input :value="nomorBerikutnya" readonly class="readonly-input"></label>
+        <label>NIM<input v-model.trim="form.nim" required inputmode="numeric" pattern="[0-9]{8,15}" title="NIM harus terdiri dari 8–15 angka" placeholder="Masukkan NIM"></label>
+        <label>Nama penerima<input v-model.trim="form.nama" required minlength="2" maxlength="80" placeholder="Nama lengkap"></label>
+        <label>Ekspedisi<select v-model="form.ekspedisi" required><option disabled value="">Pilih ekspedisi</option><option>JNE Regular</option><option>JNE Express</option></select></label>
+        <label class="full-field">Paket bahan ajar<select v-model="form.kodePaket" required><option disabled value="">Pilih paket bahan ajar</option><option v-for="paket in paket" :key="paket.kode" :value="paket.kode">{{ paket.kode }} — {{ paket.nama }}</option></select></label>
+        <div v-if="paketTerpilih" class="package-detail full-field"><div><p class="eyebrow">DETAIL PAKET</p><strong>{{ paketTerpilih.nama }}</strong><p class="muted small">Kode: {{ paketTerpilih.kode }}</p></div><div><span class="muted small">Isi paket</span><ul><li v-for="kode in paketTerpilih.isi" :key="kode">{{ kode }} — {{ judulBahan(kode) }}</li></ul></div><div><span class="muted small">Total harga</span><strong class="price-large">{{ formatRupiah(paketTerpilih.harga) }}</strong></div></div>
+        <label>Tanggal kirim<input v-model="form.tanggalKirim" type="date" required :max="tanggalHariIni"></label>
+        <label>Total harga<input :value="paketTerpilih ? formatRupiah(paketTerpilih.harga) : 'Pilih paket terlebih dahulu'" readonly class="readonly-input"></label>
+        <div class="form-actions full-field"><p v-if="formError" class="form-error">{{ formError }}</p><button type="submit" class="btn btn-primary">+ Buat Delivery Order</button></div>
+      </form>
+    </section>
+    <section class="panel">
+      <div class="panel-heading"><div><p class="eyebrow">DATA PENGIRIMAN</p><h3>Daftar Delivery Order</h3></div><span class="result-count">{{ daftarDO.length }} DO</span></div>
+      <div class="filters-grid tracking-filter"><label class="search-field">Cari DO / NIM / nama<input v-model.trim="searchDO" type="search" placeholder="Masukkan kata kunci..."></label><label>Status pengiriman<select v-model="filterStatus"><option value="">Semua status</option><option>Draf</option><option>Diproses</option><option>Siap Dikirim</option><option>Dalam Perjalanan</option><option>Terkirim</option></select></label></div>
+      <div class="table-wrap"><table><thead><tr><th>Nomor DO</th><th>Penerima</th><th>Paket</th><th>Ekspedisi</th><th>Tanggal kirim</th><th>Total</th><th>Status</th><th>Detail</th><th>Aksi</th></tr></thead><tbody>
+        <tr v-for="item in filteredDO" :key="item.nomor"><td><strong class="code-text">{{ item.nomor }}</strong></td><td><strong>{{ item.nama }}</strong><span class="table-subtitle">NIM {{ item.nim }}</span></td><td>{{ namaPaket(item.paket) }}</td><td>{{ item.ekspedisi }}</td><td>{{ item.tanggalKirim }}</td><td>{{ formatRupiah(item.total) }}</td><td><span :class="['status-pill', item.status === 'Terkirim' ? 'status-safe' : 'status-info']">{{ item.status }}</span></td><td><button class="btn btn-light btn-sm" @click="pilihDO(item)">Lihat</button></td><td><button class="btn btn-danger btn-sm" @click="hapusDO(item)">Delete</button></td></tr>
+        <tr v-if="filteredDO.length === 0"><td colspan="9" class="empty-state">Data Delivery Order tidak ditemukan.</td></tr>
+      </tbody></table></div>
+    </section>
+    <section v-if="doTerpilih" class="panel detail-panel">
+      <div class="panel-heading"><div><p class="eyebrow">RINCIAN PENGIRIMAN</p><h3>{{ doTerpilih.nomor }}</h3></div><button class="btn btn-light btn-sm" @click="doTerpilih = null">Tutup detail</button></div>
+      <div class="detail-grid"><div><span class="muted small">Penerima</span><strong>{{ doTerpilih.nama }}</strong><span class="muted small">NIM {{ doTerpilih.nim }}</span></div><div><span class="muted small">Paket</span><strong>{{ namaPaket(doTerpilih.paket) }}</strong><span class="muted small">{{ formatRupiah(doTerpilih.total) }}</span></div><div><span class="muted small">Ekspedisi</span><strong>{{ doTerpilih.ekspedisi }}</strong><span class="muted small">Dikirim {{ doTerpilih.tanggalKirim }}</span></div></div>
+      <div class="status-update">
+        <div><p class="eyebrow">PEMBARUAN STATUS</p><strong>Status saat ini: {{ doTerpilih.status }}</strong><p class="muted small">Perbarui sesuai tahap pengiriman yang benar-benar dilakukan.</p></div>
+        <div class="status-actions">
+          <button v-if="doTerpilih.status === 'Draf'" class="btn btn-light btn-sm" @click="ubahStatus(doTerpilih, 'Diproses')">Tandai Diproses</button>
+          <button v-if="doTerpilih.status === 'Diproses'" class="btn btn-light btn-sm" @click="ubahStatus(doTerpilih, 'Siap Dikirim')">Tandai Siap Dikirim</button>
+          <button v-if="doTerpilih.status === 'Siap Dikirim'" class="btn btn-light btn-sm" @click="ubahStatus(doTerpilih, 'Dalam Perjalanan')">Diserahkan ke Ekspedisi</button>
+          <button v-if="doTerpilih.status === 'Dalam Perjalanan'" class="btn btn-primary btn-sm" @click="ubahStatus(doTerpilih, 'Terkirim')">Tandai Terkirim</button>
+          <span v-if="doTerpilih.status === 'Terkirim'" class="status-pill status-safe">✓ Pengiriman selesai</span>
+        </div>
+      </div>
+      <h4 class="timeline-title">Riwayat perjalanan</h4><ol class="timeline"><li v-for="(jejak, index) in doTerpilih.perjalanan" :key="index"><span class="timeline-dot"></span><div><strong>{{ jejak.keterangan }}</strong><p class="muted small">{{ jejak.waktu }}</p></div></li></ol>
+    </section>
+    <div v-if="notice" class="toast" role="status">{{ notice }}</div>
+    <footer class="footer">SITTA · Tracking Delivery Order <a href="stok.html">← Kembali ke Stok</a></footer>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script><script src="js/dataBahanAjar.js"></script><script src="js/tracking-app.js"></script>
+</body>
+</html>
